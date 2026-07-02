@@ -1,0 +1,24 @@
+version: "3.9"
+
+configs:
+  printer_cfg:
+    file: ./mainSailConfigs/config0.json
+
+services:
+  mainsail:
+    image: ghcr.io/mainsail-crew/mainsail:latest
+    ports:
+      - "8080:80"
+    configs:
+      - source: printer_cfg
+        target: /config/printer.cfg
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    networks:
+      - mainsailnet
+
+networks:
+  mainsailnet:
+    driver: overlay
