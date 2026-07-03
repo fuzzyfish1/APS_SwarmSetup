@@ -1,24 +1,42 @@
-version: "3.9"
+# Deploy with:  docker stack deploy -c docker-compose.yaml mainsail
+# Requires a config.json in the same directory (see below).
 
-configs:
-  printer_cfg:
-    file: ./mainSailConfigs/config0.json
+version: "3.8"
 
 services:
   mainsail:
     image: ghcr.io/mainsail-crew/mainsail:latest
     ports:
-      - "8080:80"
+      - target: 8080
+        published: 8080
+        protocol: tcp
+        mode: ingress          # reachable on :8080 via any node in the swarm
     configs:
-      - source: printer_cfg
-        target: /config/printer.cfg
+      - source: mainsail_config_v1
+        target: /usr/share/nginx/html/config.json
+    networks:
+      - mainsail_net
     deploy:
+      mode: replicated
       replicas: 1
       restart_policy:
-        condition: on-failure
-    networks:
-      - mainsailnet
+        condition: any
+        delay: 5s
+        max_attempts: 0
+      update_config:
+        order: start-first     # bring new task up before killing the old one
+        parallelism: 1
+        failure_action: rollback
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 32M
+
+configs:
+  mainsail_config_v1:
+    file: ./mainSailConfigs/config0.json
 
 networks:
-  mainsailnet:
+  mainsail_net:
     driver: overlay

@@ -2,6 +2,6 @@
     "defaultLocale": "en",
     "instancesDB": "json",
     "instances": [
-    	{ "hostname": "192.168.0.220", "port": 7125 }
+    	{ "name": "printer0", "hostname": "192.168.0.220", "port": 7125 }
     ]
 }
