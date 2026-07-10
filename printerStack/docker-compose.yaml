@@ -1,42 +1,63 @@
-# Deploy with:  docker stack deploy -c docker-compose.yaml mainsail
-# Requires a config.json in the same directory (see below).
-
 version: "3.8"
 
 services:
-  mainsail:
-    image: ghcr.io/mainsail-crew/mainsail:latest
-    ports:
-      - target: 8080
-        published: 8080
-        protocol: tcp
-        mode: ingress          # reachable on :8080 via any node in the swarm
-    configs:
-      - source: mainsail_config_v1
-        target: /usr/share/nginx/html/config.json
-    networks:
-      - mainsail_net
-    deploy:
-      mode: replicated
-      replicas: 1
-      restart_policy:
-        condition: any
-        delay: 5s
-        max_attempts: 0
-      update_config:
-        order: start-first     # bring new task up before killing the old one
-        parallelism: 1
-        failure_action: rollback
-      resources:
-        limits:
-          memory: 128M
-        reservations:
-          memory: 32M
+    mainsailP0:
+        image: ghcr.io/mainsail-crew/mainsail:latest
+        ports:
+            - "8080:8080"
+        configs:
+            - source: mainsailConfig0
+              target: /usr/share/nginx/html/config.json
+        deploy:
+            replicas: 1
 
+    mainsailP1:
+        image: ghcr.io/mainsail-crew/mainsail:latest
+        ports:
+            - "8081:8080"
+        configs:
+            - source: mainsailConfig1
+              target: /usr/share/nginx/html/config.json
+        deploy:
+            replicas: 1
+            
+    mainsailP2:
+        image: ghcr.io/mainsail-crew/mainsail:latest
+        ports:
+            - "8082:8080"
+        configs:
+            - source: mainsailConfig2
+              target: /usr/share/nginx/html/config.json
+        deploy:
+            replicas: 1
+
+    # mainsailP3:
+    #     image: ghcr.io/mainsail-crew/mainsail:latest
+    #     ports:
+    #         - "8083:8080"
+    #     configs:
+    #         - source: mainsailConfig3
+    #           target: /usr/share/nginx/html/config.json
+    #     deploy:
+    #         replicas: 1
+    #         
+    # mainsailP4:
+    #     image: ghcr.io/mainsail-crew/mainsail:latest
+    #     ports:
+    #         - "8084:8080"
+    #     configs:
+    #         - source: mainsailConfig4
+    #           target: /usr/share/nginx/html/config.json
+    #     deploy:
+    #         replicas: 1
 configs:
-  mainsail_config_v1:
-    file: ./mainSailConfigs/config0.json
-
-networks:
-  mainsail_net:
-    driver: overlay
+    mainsailConfig0:
+        file: ./mainSailConfigs/config0.json
+    mainsailConfig1:
+        file: ./mainSailConfigs/config1.json
+    mainsailConfig2:
+        file: ./mainSailConfigs/config2.json
+    mainsailConfig3:
+        file: ./mainSailConfigs/config3.json
+    mainsailConfig4:
+        file: ./mainSailConfigs/config4.json
